@@ -49,7 +49,7 @@ struct File: public Entry {
     uint64_t parent;
 
     uint64_t start;
-    uint64_t size;
+    uint64_t end;
 
     File(): Entry(EntryKind::File) {}
 };
@@ -81,9 +81,9 @@ int read(FILE* f) {
     EntryKind kind;
     assert(fread(&kind, sizeof(EntryKind), 1, f) == 1);
 
-    uint64_t size;
-    assert(fread(&size, size(kind), 1, f) == 1);
-
+    uint64_t s;
+    assert(fread(&s, size(kind), 1, f) == 1);
+    return 1;
 }
 
 

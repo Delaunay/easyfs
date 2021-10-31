@@ -7,21 +7,22 @@ INCLUDE_DIRECTORIES(.)
 #   file(GLOB APL_SRC *.cc)
 #   file(GLOB_RECURSE APL_SRC *.cc)
 
-SET(PROJECT_TEST_HDS
+SET(EASYFS_HDS
     logger.h
+    siphash.h
 )
 
-SET(PROJECT_TEST_SRC
+SET(EASYFS_SRC
     logger.cpp
-    siphash.c
+    siphash.cpp
 )
 
 # main library (prevent recompilation when building tests)
-ADD_LIBRARY(${PROJECT_NAME} ${PROJECT_TEST_SRC} ${PROJECT_TEST_HDS})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} spdlog::spdlog)
+ADD_LIBRARY(easyfs ${EASYFS_SRC} ${EASYFS_HDS})
+TARGET_LINK_LIBRARIES(easyfs spdlog::spdlog)
 
 #  main executable
 # ==========================
 
 ADD_EXECUTABLE(main main.cpp)
-TARGET_LINK_LIBRARIES(main spdlog::spdlog ${PROJECT_NAME})
+TARGET_LINK_LIBRARIES(main spdlog::spdlog easyfs)

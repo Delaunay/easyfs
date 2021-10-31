@@ -4,7 +4,7 @@ INCLUDE(CTest)
 
 # This is for QtCreator which does not add single header to the project
 SET(TEST_HEADER
-    add_test.h mult_test.h)
+    hashtable_test.h)
 
 setup_target_for_coverage_gcovr_html(
     NAME coverage
@@ -29,6 +29,6 @@ ENDMACRO(TEST_MACRO)
 # file_name_test.cpp ==> CBTEST_MACRO(file_name)
 
 # User's Libraries
-SET(project_libraries ${PROJECT_NAME})
+SET(project_libraries easyfs)
 
-TEST_MACRO(symbolic ${project_libraries})
+TEST_MACRO(easyfs ${project_libraries})

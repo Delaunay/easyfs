@@ -16,9 +16,10 @@
  */
 
 #include "siphash.h"
-#include <assert.h>
-#include <stdint.h>
-#include <stdio.h>
+
+#include <cassert>
+#include <cstdint>
+#include <cstdio>
 
 /* default: SipHash-2-4 */
 #ifndef cROUNDS

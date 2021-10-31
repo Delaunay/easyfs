@@ -1,5 +1,4 @@
-#include "mult_test.h"
-#include "add_test.h"
+#include "hashtable_test.h"
 
 
 int main(int argc, char **argv)

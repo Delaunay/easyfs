@@ -2,6 +2,8 @@
 #include "version.h"
 #include "easyfs.h"
 
+#include "hashtable.h"
+
 NEW_EXCEPTION(HugeError);
 
 
@@ -43,8 +45,6 @@ uint64_t size(EntryKind k) {
 }
 
 
-
-
 }
 
 
@@ -53,6 +53,8 @@ int main(){
     info("version hash  : {}", _HASH);
     info("version date  : {}", _DATE);
     info("version branch: {}", _BRANCH);
+
+    easyfs::HashTable<int, int> b;
 
     return 0;
 }
