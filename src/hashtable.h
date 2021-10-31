@@ -8,6 +8,7 @@
 
 #include "siphash.h"
 
+#include <iostream>
 
 namespace easyfs {
 
@@ -97,8 +98,8 @@ public:
         _storage(Storage(reserve))
     {}
 
-    int load_factor() const {
-        return used / _storage.size();
+    float load_factor() const {
+        return float(used) / float(_storage.size());
     }
 
     bool get(const Key& name, Value& v) const {
@@ -135,10 +136,14 @@ public:
         Storage storage(int(_storage.size() * multiplier));
 
         for(auto& item: _storage) {
-            switch (insert(storage, item, false)) {
+            if (!item.used || item.deleted) {
+                continue;
+            }
+
+            switch(insert(storage, item, false)) {
                 case InsertStatus::Duplicate:
                 case InsertStatus::FailureLinearProbing:
-                    assert(false && "This should be unreachable in this context");
+                    assert(false && "Unreachalbe");
             }
         }
 
@@ -209,7 +214,11 @@ public:
 
             case InsertStatus::FailureLinearProbing: {
                 rehash();
-                return insert(_storage, item, upsert) <= InsertStatus::Success;
+                if (insert(_storage, item, upsert) <= InsertStatus::Success) {
+                    used += 1;
+                    return true;
+                }
+                return false;
             }
             case InsertStatus::Duplicate:
                 return false;
@@ -232,7 +241,7 @@ public:
         Item& item = data[i];
 
         // No collision
-        if (!item.used) {
+        if (!item.used || item.deleted) {
             item = inserted_item;
             return InsertStatus::Insert;
         }
@@ -251,7 +260,7 @@ public:
 
                 auto& item = data[(i + offset) % data.size()];
 
-                if (!item.used) {
+                if (!item.used || item.deleted) {
                     item = inserted_item;
                     return InsertStatus::LinearProbing;
                 }
