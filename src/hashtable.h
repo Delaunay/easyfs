@@ -55,8 +55,8 @@ private:
 
         Key const key;
         Value value;
-        bool used = false;
-        bool deleted = true;
+        bool used: 1 = false;
+        bool deleted: 1 = true;
 
         Item& operator= (Item const& i) {
             Key& mutkey = (Key&)key;
@@ -110,13 +110,19 @@ public:
             // linear probing
             int offset = 1;
             while (offset < _storage.size()) {
+                // item was not used, so we know there was no collision
+                // and no linear prob insert was done after this
+                if (!item.used) {
+                    return false;
+                }
+
                 // skip deleted entries
                 if (!item.deleted && item.key == name) {
                     v = item.value;
                     return true;
                 }
 
-                item = _storage[i + offset];
+                item = _storage[(i + offset) % _storage.size()];
                 offset += 1;
             }
         }
@@ -151,10 +157,18 @@ public:
         uint64_t i = hash(name) % _storage.size();
         auto& item = _storage[i];
 
+        // if item was deleted we need to do linear probing
+        // since the item we are looking for could be after the deleted entry
         if (item.used || item.deleted) {
             // linear probing
             int offset = 1;
             while (offset < _storage.size()) {
+                // item was not used, so we know there was no collision
+                // and no linear prob insert was done after this
+                if (!item.used) {
+                    return false;
+                }
+
                 if (!item.deleted && item.key == name) {
                     item.deleted = true;
                     used -= 1;
