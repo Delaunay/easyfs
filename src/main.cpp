@@ -1,14 +1,50 @@
 #include "logger.h"
 #include "version.h"
+#include "easyfs.h"
 
 NEW_EXCEPTION(HugeError);
 
-int fun1(){
-    if (true){
-        throw HugeError("exepected {} got {}", 1, 2);
+
+
+namespace easyfs 
+{
+
+uint64_t size(Entry* e) {
+    switch (e->kind)
+    {
+        #define KIND(name)\
+            case EntryKind::name: {\
+                auto n = static_cast<name*>(e);\
+                return reinterpret_cast<uint64_t>(n->size);\
+            }
+
+        ENTRY_KIND(KIND)
+        #undef KIND
     }
 
+    // unreachable
     return 0;
+}
+
+uint64_t size(EntryKind k) {
+    switch (k)
+    {
+        #define KIND(name)\
+            case EntryKind::name: {\
+                return sizeof(name::size);\
+            }
+
+        ENTRY_KIND(KIND)
+        #undef KIND
+    }
+
+    // unreachable
+    return 0;
+}
+
+
+
+
 }
 
 
@@ -17,12 +53,6 @@ int main(){
     info("version hash  : {}", _HASH);
     info("version date  : {}", _DATE);
     info("version branch: {}", _BRANCH);
-
-    try {
-        fun1();
-    } catch (const HugeError& ex) {
-        ex.what();
-    }
 
     return 0;
 }

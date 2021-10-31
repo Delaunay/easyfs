@@ -8,13 +8,12 @@ INCLUDE_DIRECTORIES(.)
 #   file(GLOB_RECURSE APL_SRC *.cc)
 
 SET(PROJECT_TEST_HDS
-    symbolic.h
     logger.h
 )
 
 SET(PROJECT_TEST_SRC
-    symbolic.cpp
     logger.cpp
+    siphash.c
 )
 
 # main library (prevent recompilation when building tests)
