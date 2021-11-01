@@ -19,7 +19,7 @@ struct Hash {
         uint64_t value = 0;
         siphash(
             (const void*)&k, 
-            (size_t) sizeof(void*), 
+            (size_t) sizeof(T), 
             SALT, 
             (uint8_t*)&value, 
             (size_t) sizeof(uint64_t)
@@ -44,6 +44,11 @@ struct Hash<std::string> {
     }
 };
 
+// TODO: rewrite this with a Storage for Key-Values
+// and a HashTable for Key->Index 
+// the HasTable will be bigger than the number of values so it is useful
+// to make it as small as possible
+// but then it is not exactly linear probing
 template<typename Key, typename Value, typename H = Hash<Key>>
 struct HashTable {
 private:
@@ -83,7 +88,7 @@ public:
     }
 
     bool get(const Key& name, Value& v) const {
-        Item const* item = find(name);
+        Item const* item = _find(name);
 
         if (item == nullptr) {
             return false;
@@ -102,7 +107,7 @@ public:
     }
 
     bool remove(const Key& name) {
-        Item* item = (Item*) find(name);
+        Item* item = (Item*) _find(name);
 
         if (item == nullptr){
             return false;
@@ -159,7 +164,9 @@ public:
     }
 
 private:
-    Item const* find(const Key& name) const {
+    // this cannot be exposed because it returns a pointer
+    // that could change once rehash is called
+    Item const* _find(const Key& name) const {
         uint64_t i = H::hash(name) % _storage.size();
 
         // linear probing
