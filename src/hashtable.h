@@ -211,6 +211,7 @@ private:
         return insert(_storage, item, upsert, this->used, this->collision);
     }
    
+    // insert is slower than std::unordered_map
     static bool insert(Storage& data, Item const& inserted_item, bool upsert, int& used, int& collision) {
         uint64_t i = H::hash(inserted_item.key);
         

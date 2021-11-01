@@ -1,0 +1,76 @@
+[==========] Running 17 tests from 9 test cases.
+[----------] Global test environment set-up.
+[----------] 1 test from fast_mod
+[ RUN      ] fast_mod.valid
+[       OK ] fast_mod.valid (1 ms)
+[----------] 1 test from fast_mod (1 ms total)
+
+[----------] 2 tests from benchmark_mod
+[ RUN      ] benchmark_mod.fast_mod
+[       OK ] benchmark_mod.fast_mod (118 ms)
+[ RUN      ] benchmark_mod.reg_mod
+[       OK ] benchmark_mod.reg_mod (114 ms)
+[----------] 2 tests from benchmark_mod (232 ms total)
+
+[----------] 4 tests from hastable
+[ RUN      ] hastable.base
+[       OK ] hastable.base (0 ms)
+[ RUN      ] hastable.rehash
+[       OK ] hastable.rehash (0 ms)
+[ RUN      ] hastable.collision
+[       OK ] hastable.collision (0 ms)
+[ RUN      ] hastable.collision_deletion
+[       OK ] hastable.collision_deletion (0 ms)
+[----------] 4 tests from hastable (0 ms total)
+
+[----------] 1 test from benchmark
+[ RUN      ] benchmark.init
+[       OK ] benchmark.init (51 ms)
+[----------] 1 test from benchmark (51 ms total)
+
+[----------] 1 test from benchmark_insert
+[ RUN      ] benchmark_insert.init
+[       OK ] benchmark_insert.init (0 ms)
+[----------] 1 test from benchmark_insert (0 ms total)
+
+[----------] 2 tests from benchmark_insert_str
+[ RUN      ] benchmark_insert_str.hashtable
+41524
+[       OK ] benchmark_insert_str.hashtable (40 ms)
+[ RUN      ] benchmark_insert_str.unordered_map
+[       OK ] benchmark_insert_str.unordered_map (28 ms)
+[----------] 2 tests from benchmark_insert_str (68 ms total)
+
+[----------] 2 tests from benchmark_lookup_str
+[ RUN      ] benchmark_lookup_str.hashtable
+[ TIME     ] insert 3905.33 ms
+[ TIME     ] lookup 1528.27 ms
+[       OK ] benchmark_lookup_str.hashtable (5435 ms)
+[ RUN      ] benchmark_lookup_str.unordered_map
+[ TIME     ] insert 2765.95 ms
+[ TIME     ] lookup 2172.16 ms
+[       OK ] benchmark_lookup_str.unordered_map (4940 ms)
+[----------] 2 tests from benchmark_lookup_str (10375 ms total)
+
+[----------] 2 tests from benchmark_insert_int
+[ RUN      ] benchmark_insert_int.hashtable
+150230
+[       OK ] benchmark_insert_int.hashtable (151 ms)
+[ RUN      ] benchmark_insert_int.unordered_map
+[       OK ] benchmark_insert_int.unordered_map (56 ms)
+[----------] 2 tests from benchmark_insert_int (207 ms total)
+
+[----------] 2 tests from benchmark_lookup_int
+[ RUN      ] benchmark_lookup_int.hashtable
+[ TIME     ] insert 14432.5 ms
+[ TIME     ] lookup 2050.75 ms
+[       OK ] benchmark_lookup_int.hashtable (16490 ms)
+[ RUN      ] benchmark_lookup_int.unordered_map
+[ TIME     ] insert 5679.24 ms
+[ TIME     ] lookup 2979.44 ms
+[       OK ] benchmark_lookup_int.unordered_map (8671 ms)
+[----------] 2 tests from benchmark_lookup_int (25161 ms total)
+
+[----------] Global test environment tear-down
+[==========] 17 tests from 9 test cases ran. (36095 ms total)
+[  PASSED  ] 17 tests.
