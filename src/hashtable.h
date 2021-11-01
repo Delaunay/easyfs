@@ -44,6 +44,18 @@ struct Hash<std::string> {
     }
 };
 
+
+#define FAST_MOD(i, mod) ((i < mod) * i + (i - mod) * (i > mod))
+#define REG_MOD(i, mod) i % mod
+
+inline int fast_mod(int i, int mod) {
+    return FAST_MOD(i, mod);
+}
+
+inline int reg_mod(int i, int mod) {
+    return REG_MOD(i, mod);
+}
+
 // TODO: rewrite this with a Storage for Key-Values
 // and a HashTable for Key->Index 
 // the HasTable will be bigger than the number of values so it is useful
@@ -147,42 +159,42 @@ public:
     // Rebuild the hash using a bigger storage
     void rehash(float multiplier = 2.f) {
         Storage storage(int(_storage.size() * multiplier));
+        int a = 0;
+        int b = 0;
 
         for(auto& item: _storage) {
             if (!item.used || item.deleted) {
                 continue;
             }
-
-            switch(insert(storage, item, false)) {
-                case InsertStatus::Duplicate:
-                case InsertStatus::FailureLinearProbing:
-                    assert(false && "Unreachalbe");
-            }
+            insert(storage, item, false, a, b);
         }
 
         _storage = storage;
     }
 
 private:
+
     // this cannot be exposed because it returns a pointer
     // that could change once rehash is called
     Item const* _find(const Key& name) const {
-        uint64_t i = H::hash(name) % _storage.size();
+        uint64_t i = H::hash(name);
 
         // linear probing
-        for(int offset = 0; offset < _storage.size(); offset++) {
-            auto& item = _storage[(i + offset) % _storage.size()];
+        for(uint64_t offset = 0; offset < _storage.size(); offset++) {
+            //for(int m = -1; m < 2; m += 2) {
+                auto& item = _storage[REG_MOD((i + offset), _storage.size())];
 
-            // item was not used, so we know there was no collision
-            // and no linear probe insert was done after this
-            if (!item.used) {
-                return nullptr;
-            }
+                // item was not used, so we know there was no collision
+                // and no linear probe insert was done after this
+                if (!item.used) {
+                    return nullptr;
+                }
 
-            // Item is not deleted and key matches
-            if (!item.deleted && item.key == name) {
-                return &item;
-            }
+                // Item is not deleted and key matches
+                if (!item.deleted && item.key == name) {
+                    return &item;
+                }
+            //}
         }
     
         return nullptr;
@@ -191,76 +203,48 @@ private:
     // insert a key value pair
     // if the key already exist does not insert
     bool track_insert(const Key& name, const Value& value, bool upsert) {
-        if (load_factor() >= 1) {
+        if (load_factor() >= 0.75) {
             rehash();
         }
 
         auto item = Item(name, value);
-        auto status = insert(_storage, item, upsert);
+        return insert(_storage, item, upsert, this->used, this->collision);
+    }
+   
+    static bool insert(Storage& data, Item const& inserted_item, bool upsert, int& used, int& collision) {
+        uint64_t i = H::hash(inserted_item.key);
+        
+        for(uint64_t offset = 0; offset < data.size(); offset++) {
+            //for(int m = -1; m < 2; m += 2) {
+                Item& item = data[REG_MOD((i + offset), data.size())];
 
-        switch (status) {
-            case InsertStatus::LinearProbing:
-                collision += 1;
-            case InsertStatus::Insert: 
-                used += 1;
-            case InsertStatus::Update:
-            case InsertStatus::Success:
-                return true;
-
-            case InsertStatus::FailureLinearProbing: {
-                rehash();
-                if (insert(_storage, item, upsert) <= InsertStatus::Success) {
+                if (!item.used || item.deleted) {
+                    item = inserted_item;
                     used += 1;
                     return true;
                 }
-                return false;
-            }
-            case InsertStatus::Duplicate:
-                return false;
+
+                if (item.key == inserted_item.key) {
+                    if (upsert) {
+                        item.value = inserted_item.value;
+                        return true;
+                    }
+                    return false;
+                }
+
+                collision += 1;
+            //}
         }
 
         return false;
-    }
-   
-    enum class InsertStatus: uint8_t {
-        Insert,
-        LinearProbing,
-        Update,
-        Success,
-        FailureLinearProbing,
-        Duplicate,
-    };
-
-    static InsertStatus insert(Storage& data, Item const& inserted_item, bool upsert) {
-        uint64_t i = H::hash(inserted_item.key) % data.size();
-        
-        for(int offset = 0; offset < data.size(); offset++) {
-            Item& item = data[(i + offset) % data.size()];
-
-            if (!item.used || item.deleted) {
-                item = inserted_item;
-
-                int p = offset > 0;
-                return InsertStatus(int(InsertStatus::Insert) * (1 - p) + int(InsertStatus::LinearProbing) * p);
-            }
-
-            if (item.key == inserted_item.key) {
-                if (upsert) {
-                    item.value = inserted_item.value;
-                    return InsertStatus::Update;
-                }
-
-                return InsertStatus::Duplicate;
-            }
-        }
-
-        // unreachable
-        return InsertStatus::FailureLinearProbing;
     }
 
     int used = 0;
     int collision = 0;
     Storage _storage;
+
+    public:
+    int collided() const { return collision; }
 };
 }
 

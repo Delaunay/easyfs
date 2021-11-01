@@ -3,10 +3,42 @@
 
 #include <gtest/gtest.h>
 #include <iostream>
+#include <chrono>
+#include <fstream>
+#include <unordered_map>
+#include <random>
 
 #include "hashtable.h"
 
 using namespace easyfs;
+
+TEST(fast_mod, valid) {
+    int n = 1093;
+    for(int i = 0; i < n * 2; i++) {
+        EXPECT_EQ(fast_mod(i, n), i % n);
+    }
+}
+
+#define REPEAT 10000
+TEST(benchmark_mod, fast_mod) {
+    int n = 1093;
+    for(int j = 0; j < REPEAT; j++){
+        int volatile s = 0;
+        for(int i = 0; i < n * 2; i++) {
+            s += fast_mod(i, n);
+        }
+    }
+}
+
+TEST(benchmark_mod, reg_mod) {
+    int n = 1093;
+    for(int j = 0; j < REPEAT; j++){
+        int volatile s = 0;
+        for(int i = 0; i < n * 2; i++) {
+            s += reg_mod(i, n);
+        }
+    }
+}
 
 TEST(hastable, base)
 {
@@ -118,7 +150,7 @@ TEST(hastable, collision)
     }
     
     EXPECT_EQ(v.size(), 12);
-    EXPECT_FLOAT_EQ(v.load_factor(), 1.f);
+    // EXPECT_FLOAT_EQ(v.load_factor(), 1.f);
 
     for(int i = 0; i < 12; i++) {
         int value = 0;
@@ -169,4 +201,197 @@ TEST(hastable, collision_deletion)
 
     EXPECT_LT(v.load_factor(), 1.f);
 }
+
+inline std::vector<std::tuple<std::string, int>> const& pairs() {
+    static std::vector<std::tuple<std::string, int>> data;
+
+    if (data.size() > 0) {
+        return data;
+    }
+
+    auto f = std::ifstream("../tests/Honor of Thieves.txt");
+
+  std::default_random_engine generator;
+  std::uniform_int_distribution<int> distribution(0, 100000 * 10);
+
+    while (f) {
+        std::string s;
+        f >> s;
+        data.push_back(std::make_tuple(s, distribution(generator)));
+
+        if (data.size() > 1000000) {
+            break;
+        }
+    }
+
+    return data;
+}
+
+TEST(benchmark, init) {
+    pairs();
+}
+
+
+TEST(benchmark_insert, init) {
+    pairs();
+}
+
+#define INIT 1093
+
+TEST(benchmark_insert_str, hashtable) {
+    HashTable<std::string, int> v(INIT);
+
+    for (auto& p: pairs()) {
+        v.insert(std::get<0>(p), std::get<1>(p));
+    }
+
+    std::cout << v.collided() << std::endl;
+}
+
+
+#define START() auto start = std::chrono::system_clock::now()
+#define DURATION() (std::chrono::duration<double>(end - start).count())
+#define END(name)\
+    auto end = std::chrono::system_clock::now();\
+    std::cout << "[ TIME     ] " << name << " " << DURATION() * 1000.f << " ms\n";
+
+TEST(benchmark_lookup_str, hashtable) {
+    HashTable<std::string, int> v(INIT);
+    int value;
+
+    { 
+        START();
+        for(int i = 0; i < 100; i++){
+            v = HashTable<std::string, int>(INIT);
+            for (auto& p: pairs()) {
+                v.insert(std::get<0>(p), std::get<1>(p));
+            }
+        }
+        END("insert");
+    }
+
+    {
+        START();
+        for(int i = 0; i < 100; i++){
+            for (auto& p: pairs()) {
+                v.get(std::get<0>(p), value);
+            }
+        }
+        END("lookup");
+    }
+}
+
+TEST(benchmark_insert_int, hashtable) {
+    HashTable<int, std::string> v(INIT);
+
+    for (auto& p: pairs()) {
+        v.insert(std::get<1>(p), std::get<0>(p));
+    }
+
+    std::cout << v.collided() << std::endl;
+}
+
+TEST(benchmark_lookup_int, hashtable) {
+    HashTable<int, std::string> v(INIT);
+    std::string value;
+
+    { 
+        START();
+        for(int i = 0; i < 100; i++){
+            v = HashTable<int, std::string>(INIT);
+            for (auto& p: pairs()) {
+                v.insert(std::get<1>(p), std::get<0>(p));
+            }
+        }
+        END("insert");
+    }
+
+    {
+        START();
+        for(int i = 0; i < 100; i++){
+            for (auto& p: pairs()) {
+                v.get(std::get<1>(p), value);
+            }
+        }
+        END("lookup");
+    }
+}
+
+
+template<typename T>
+struct Siphash {
+    std::size_t operator()(const T& k) const
+    {
+        return Hash<T>::hash(k);
+    }
+};
+
+TEST(benchmark_insert_str, unordered_map) {
+    std::unordered_map<std::string, int, Siphash<std::string>> v(INIT);
+
+    for (auto& p: pairs()) {
+        v[std::get<0>(p)] = std::get<1>(p);
+    }
+}
+
+TEST(benchmark_lookup_str, unordered_map) {
+    int value;
+    std::unordered_map<std::string, int, Siphash<std::string>> v(INIT);
+    {
+        START();
+        for(int i = 0; i < 100; i++){
+            v = std::unordered_map<std::string, int, Siphash<std::string>>(INIT);
+            for (auto& p: pairs()) {
+                v[std::get<0>(p)] = std::get<1>(p);
+            }
+        }
+        END("insert");
+    }
+
+    {
+        START();
+        for(int i = 0; i < 100; i++){
+            for (auto& p: pairs()) {
+                value = v[std::get<0>(p)];
+            }
+        }
+        END("lookup");
+    }
+}
+
+TEST(benchmark_insert_int, unordered_map) {
+    std::unordered_map<int, std::string, Siphash<int>> v(INIT);
+
+    for (auto& p: pairs()) {
+        v[std::get<1>(p)] = std::get<0>(p);
+    }
+}
+
+TEST(benchmark_lookup_int, unordered_map) {
+    std::unordered_map<int, std::string, Siphash<int>> v(INIT);
+    std::string value;
+
+    {
+        START();
+        for(int i = 0; i < 100; i++){
+            v = std::unordered_map<int, std::string, Siphash<int>>(INIT);
+            for (auto& p: pairs()) {
+                v[std::get<1>(p)] = std::get<0>(p);
+            }
+        }
+        END("insert");
+    }
+
+    {
+        START();
+        for(int i = 0; i < 100; i++){
+            for (auto& p: pairs()) {
+                value = v[std::get<1>(p)];
+            }
+        }
+        END("lookup");
+    }
+}
+
+
 #endif
