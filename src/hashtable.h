@@ -5,44 +5,46 @@
 #include <tuple>
 #include <vector>
 #include <sstream>
+#include <functional>
 
 #include "siphash.h"
-
-#include <iostream>
 
 namespace easyfs {
 
 const char* SALT = "dW8(2!?GTfDFJ@Le";
 
 template<typename T>
-uint64_t hash(T const& k) {
-    uint64_t value = 0;
-    siphash(
-        (const void*)&k, 
-        (size_t) sizeof(void*), 
-        SALT, 
-        (uint8_t*)&value, 
-        (size_t) sizeof(uint64_t)
-    );
-    return value;
-}
+struct Hash {
+    static uint64_t hash (T const& k) noexcept{
+        uint64_t value = 0;
+        siphash(
+            (const void*)&k, 
+            (size_t) sizeof(void*), 
+            SALT, 
+            (uint8_t*)&value, 
+            (size_t) sizeof(uint64_t)
+        );
+        return value;
+    }
+};
 
 template<>
-uint64_t hash(std::string const& k) {
-    uint64_t value = 0;
+struct Hash<std::string> {
+    static uint64_t hash (std::string const& k) noexcept{
+        uint64_t value = 0;
         siphash(
-        (const void*)&k[0], 
-        (size_t) k.size(), 
-        SALT, 
-        (uint8_t*)&value, 
-        (size_t) sizeof(uint64_t)
-    );
+            (const void*)&k[0], 
+            (size_t) k.size(), 
+            SALT, 
+            (uint8_t*)&value, 
+            (size_t) sizeof(uint64_t)
+        );
 
-    return value;
-}
+        return value;
+    }
+};
 
-
-template<typename Key, typename Value>
+template<typename Key, typename Value, typename H = Hash<Key>>
 struct HashTable {
 private:
     struct Item {
@@ -72,6 +74,49 @@ private:
     using Storage = std::vector<Item>;
 
 public:
+    HashTable(int reserve = 128):
+        _storage(Storage(reserve))
+    {}
+
+    float load_factor() const {
+        return float(used) / float(_storage.size());
+    }
+
+    bool get(const Key& name, Value& v) const {
+        Item const* item = find(name);
+
+        if (item == nullptr) {
+            return false;
+        }
+
+        v = item->value;
+        return true;
+    }
+
+    bool insert(const Key& name, const Value& value) {
+        return track_insert(name, value, false);
+    }
+
+    bool upsert(const Key& name, const Value& value) {
+        return track_insert(name, value, true);
+    }
+
+    bool remove(const Key& name) {
+        Item* item = (Item*) find(name);
+
+        if (item == nullptr){
+            return false;
+        }
+
+        item->deleted = true;
+        used -= 1;
+        return true;
+    }
+
+    int size() const {
+        return used;
+    }
+    
     std::string __str__() const {
         std::stringstream ss;
         bool comma = false;
@@ -81,7 +126,7 @@ public:
 
             auto& item = _storage[i];
 
-            if (item.used) {
+            if (item.used && !item.deleted) {
                 if (comma) {
                     ss << ", ";
                 }
@@ -92,43 +137,6 @@ public:
         }
         ss << "}";
         return ss.str();
-    }
-
-    HashTable(int reserve = 128):
-        _storage(Storage(reserve))
-    {}
-
-    float load_factor() const {
-        return float(used) / float(_storage.size());
-    }
-
-    bool get(const Key& name, Value& v) const {
-        uint64_t i = hash(name) % _storage.size();
-        auto item = _storage[i];
-
-        // if the item was used or is deleted we need to do linear probing
-        if (item.used || item.deleted) {
-            // linear probing
-            int offset = 1;
-            while (offset < _storage.size()) {
-                // item was not used, so we know there was no collision
-                // and no linear prob insert was done after this
-                if (!item.used) {
-                    return false;
-                }
-
-                // skip deleted entries
-                if (!item.deleted && item.key == name) {
-                    v = item.value;
-                    return true;
-                }
-
-                item = _storage[(i + offset) % _storage.size()];
-                offset += 1;
-            }
-        }
-
-        return false;
     }
 
     // Rebuild the hash using a bigger storage
@@ -150,53 +158,33 @@ public:
         _storage = storage;
     }
 
-    bool insert(const Key& name, const Value& value) {
-        return _insert(name, value, false);
-    }
+private:
+    Item const* find(const Key& name) const {
+        uint64_t i = H::hash(name) % _storage.size();
 
-    bool upsert(const Key& name, const Value& value) {
-        return _insert(name, value, true);
-    }
+        // linear probing
+        for(int offset = 0; offset < _storage.size(); offset++) {
+            auto& item = _storage[(i + offset) % _storage.size()];
 
-    bool remove(const Key& name) {
-        uint64_t i = hash(name) % _storage.size();
-        auto& item = _storage[i];
+            // item was not used, so we know there was no collision
+            // and no linear probe insert was done after this
+            if (!item.used) {
+                return nullptr;
+            }
 
-        // if item was deleted we need to do linear probing
-        // since the item we are looking for could be after the deleted entry
-        if (item.used || item.deleted) {
-            // linear probing
-            int offset = 1;
-            while (offset < _storage.size()) {
-                // item was not used, so we know there was no collision
-                // and no linear prob insert was done after this
-                if (!item.used) {
-                    return false;
-                }
-
-                if (!item.deleted && item.key == name) {
-                    item.deleted = true;
-                    used -= 1;
-                    return true;
-                }
-
-                item = _storage[i + offset];
-                offset += 1;
+            // Item is not deleted and key matches
+            if (!item.deleted && item.key == name) {
+                return &item;
             }
         }
-
-        return false;
+    
+        return nullptr;
     }
 
-    int size() const {
-        return used;
-    }
-
-    private:
     // insert a key value pair
     // if the key already exist does not insert
-    bool _insert(const Key& name, const Value& value, bool upsert) {
-        if (load_factor() > 1) {
+    bool track_insert(const Key& name, const Value& value, bool upsert) {
+        if (load_factor() >= 1) {
             rehash();
         }
 
@@ -237,39 +225,30 @@ public:
     };
 
     static InsertStatus insert(Storage& data, Item const& inserted_item, bool upsert) {
-        uint64_t i = hash(inserted_item.key) % data.size();
-        Item& item = data[i];
+        uint64_t i = H::hash(inserted_item.key) % data.size();
+        
+        for(int offset = 0; offset < data.size(); offset++) {
+            Item& item = data[(i + offset) % data.size()];
 
-        // No collision
-        if (!item.used || item.deleted) {
-            item = inserted_item;
-            return InsertStatus::Insert;
-        }
+            if (!item.used || item.deleted) {
+                item = inserted_item;
 
-        // Item already there
-        if (item.key == inserted_item.key) {
-            if (!upsert) {
-                return InsertStatus::Duplicate;
+                int p = offset > 0;
+                return InsertStatus(int(InsertStatus::Insert) * (1 - p) + int(InsertStatus::LinearProbing) * p);
             }
-            item = inserted_item;
-            return InsertStatus::Update;
-        } else {
-            // Linear probing
-            int offset = 1;
-            while (offset < data.size()) {
 
-                auto& item = data[(i + offset) % data.size()];
-
-                if (!item.used || item.deleted) {
-                    item = inserted_item;
-                    return InsertStatus::LinearProbing;
+            if (item.key == inserted_item.key) {
+                if (upsert) {
+                    item.value = inserted_item.value;
+                    return InsertStatus::Update;
                 }
 
-                offset += 1;
+                return InsertStatus::Duplicate;
             }
-
-            return InsertStatus::FailureLinearProbing;
         }
+
+        // unreachable
+        return InsertStatus::FailureLinearProbing;
     }
 
     int used = 0;
