@@ -63,9 +63,11 @@ inline bool is_power2(uint64_t x) { return (x != 0) && ((x & (x - 1)) == 0); }
  * Everytime the table needs to be rehashed the storage size is doubled
  *
  */
-template <typename Key, typename Value, typename H = Hash<Key>> struct HashTable {
+template <typename Key, typename Value, typename H = Hash<Key>>
+struct HashTable {
     private:
-    struct Item {
+
+    struct _Item {
         Item() : key(Key()) {}
 
         Item(Key const &k, Value const &v) : key(k), value(v), used(true) {}
@@ -74,6 +76,12 @@ template <typename Key, typename Value, typename H = Hash<Key>> struct HashTable
         Value     value;
         bool      used : 1    = false;
         bool      deleted : 1 = true;
+
+        inline void set_hash(uint64_t) {}
+
+        inline uint64_t hash() const {
+            return H::hash(key);
+        }
 
         Item &operator=(Item const &i) {
             Key &mutkey = (Key &)key;
@@ -85,6 +93,23 @@ template <typename Key, typename Value, typename H = Hash<Key>> struct HashTable
         }
     };
 
+    // Save the Hash next to the key-value pair
+    struct _ItemCached: public _Item {
+        uint64_t  hash_value = 0;
+
+        inline void set_hash(uint64_t h) {
+            hash_value = h;
+        }
+
+        inline uint64_t hash() const {
+            if (hash_value == 0) {
+                hash_value = H::hash(key);
+            }
+            return hash_value;
+        }
+    }
+
+    using Item = _ItemCached;
     using Storage = std::vector<Item>;
 
     // Makes sure we always use a power of 2 as size
@@ -154,48 +179,6 @@ template <typename Key, typename Value, typename H = Hash<Key>> struct HashTable
 
     void resize(std::size_t n) { resize_force(n); }
 
-    // does not reinsert everything, but does not remove deleted entries
-    // this does not work yet
-    void resize_soft(std::size_t n) {
-        // n = 1024
-        // H::hash(key) == 1024 => (1024 % n) => 0
-        //
-        // resize to 2048
-        // H::hash(key) == 1024 => (1024 % n) = > 1024
-        //
-        //
-
-        n = round_size(n);
-        assert(is_power2(n));
-
-        uint64_t oldsize = _storage.size();
-        _storage.resize(round_size(n));
-
-        // TODO: remove deleted entries
-        for(auto &item : _storage) {
-            if(item.deleted || !item.used) {
-                continue;
-            }
-
-            uint64_t i = H::hash(item.key);
-
-            auto oldpos = P2_MOD(i, oldsize);
-            auto newpos = P2_MOD(i, n);
-
-            if(oldpos == newpos) {
-                continue;
-            }
-
-            for(uint64_t offset = 0; offset < _storage.size(); offset++) {
-                newpos = P2_MOD(i + offset, n);
-
-                if(!_storage[newpos].used) {
-                    std::swap(_storage[oldpos], _storage[newpos]);
-                }
-            }
-        }
-    }
-
     // force a full resize with all the entries being reinserted
     void resize_force(std::size_t n) {
         Storage storage(round_size(n));
@@ -263,10 +246,9 @@ template <typename Key, typename Value, typename H = Hash<Key>> struct HashTable
                        int &collision) {
 
         assert(is_power2(data.size()));
-        uint64_t i = H::hash(inserted_item.key);
+        uint64_t i = inserted_item.hash();
 
         for(uint64_t offset = 0; offset < data.size(); offset++) {
-            // for(int m = -1; m < 2; m += 2) {
             Item &item = data[P2_MOD((i + offset), data.size())];
 
             if(!item.used || item.deleted) {
@@ -278,6 +260,7 @@ template <typename Key, typename Value, typename H = Hash<Key>> struct HashTable
             if(item.key == inserted_item.key) {
                 if(upsert) {
                     item.value = inserted_item.value;
+                    item.set_hash(i);
                     return true;
                 }
                 return false;
