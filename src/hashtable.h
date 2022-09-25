@@ -2,6 +2,8 @@
 #ifndef EASYFS_HASHTABLE_HEADER
 #define EASYFS_HASHTABLE_HEADER
 
+#include "mimalloc-new-delete.h"
+
 #include <functional>
 #include <sstream>
 #include <tuple>
@@ -63,14 +65,12 @@ inline bool is_power2(uint64_t x) { return (x != 0) && ((x & (x - 1)) == 0); }
  * Everytime the table needs to be rehashed the storage size is doubled
  *
  */
-template <typename Key, typename Value, typename H = Hash<Key>>
-struct HashTable {
+template <typename Key, typename Value, typename H = Hash<Key>> struct HashTable {
     private:
-
     struct _Item {
-        Item() : key(Key()) {}
+        _Item() : key(Key()) {}
 
-        Item(Key const &k, Value const &v) : key(k), value(v), used(true) {}
+        _Item(Key const &k, Value const &v) : key(k), value(v), used(true) {}
 
         Key const key;
         Value     value;
@@ -79,11 +79,9 @@ struct HashTable {
 
         inline void set_hash(uint64_t) {}
 
-        inline uint64_t hash() const {
-            return H::hash(key);
-        }
+        inline uint64_t hash() const { return H::hash(key); }
 
-        Item &operator=(Item const &i) {
+        _Item &operator=(_Item const &i) {
             Key &mutkey = (Key &)key;
             mutkey      = i.key;
             value       = i.value;
@@ -94,23 +92,28 @@ struct HashTable {
     };
 
     // Save the Hash next to the key-value pair
-    struct _ItemCached: public _Item {
-        uint64_t  hash_value = 0;
+    struct _ItemCached : public _Item {
+        _ItemCached() : _Item() {}
 
-        inline void set_hash(uint64_t h) {
-            hash_value = h;
-        }
+        _ItemCached(Key const &k, Value const &v) : _Item(k, v) {}
+
+        mutable uint64_t hash_value = 0;
+
+        inline void set_hash(uint64_t h) { hash_value = h; }
 
         inline uint64_t hash() const {
-            if (hash_value == 0) {
-                hash_value = H::hash(key);
+            if(hash_value == 0) {
+                hash_value = H::hash(_Item::key);
             }
             return hash_value;
         }
-    }
+    };
 
-    using Item = _ItemCached;
+    using Item    = _ItemCached;
     using Storage = std::vector<Item>;
+
+    // typedef _ItemCached       Item;
+    // typedef std::vector<Item> Storage;
 
     // Makes sure we always use a power of 2 as size
     static int round_size(int x) {
@@ -181,7 +184,7 @@ struct HashTable {
 
     // force a full resize with all the entries being reinserted
     void resize_force(std::size_t n) {
-        Storage storage(round_size(n));
+        Storage storage(round_size(int(n)));
         int     a = 0;
         int     b = 0;
 
@@ -237,7 +240,7 @@ struct HashTable {
             rehash();
         }
 
-        auto item = Item(name, value);
+        Item item(name, value);
         return insert(_storage, item, upsert, this->used, this->collision);
     }
 

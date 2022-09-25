@@ -1,3 +1,6 @@
+# Linux
+# ======
+
 [==========] Running 17 tests from 9 test cases.
 [----------] Global test environment set-up.
 [----------] 1 test from fast_mod
@@ -74,3 +77,273 @@
 [----------] Global test environment tear-down
 [==========] 17 tests from 9 test cases ran. (3157 ms total)
 [  PASSED  ] 17 tests.
+
+
+# Windows
+# =======
+
+[==========] Running 19 tests from 8 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from fast_mod
+[ RUN      ] fast_mod.valid
+[       OK ] fast_mod.valid (0 ms)
+[----------] 1 test from fast_mod (0 ms total)
+
+[----------] 1 test from fast_mod_p2
+[ RUN      ] fast_mod_p2.valid
+[       OK ] fast_mod_p2.valid (0 ms)
+[----------] 1 test from fast_mod_p2 (0 ms total)
+
+[----------] 3 tests from benchmark_mod
+[ RUN      ] benchmark_mod.fast_mod
+[       OK ] benchmark_mod.fast_mod (13 ms)
+[ RUN      ] benchmark_mod.reg_mod
+[       OK ] benchmark_mod.reg_mod (6 ms)
+[ RUN      ] benchmark_mod.fast_mod_p2
+[       OK ] benchmark_mod.fast_mod_p2 (5 ms)
+[----------] 3 tests from benchmark_mod (27 ms total)
+
+[----------] 4 tests from hastable
+[ RUN      ] hastable.base
+[       OK ] hastable.base (0 ms)
+[ RUN      ] hastable.rehash
+[       OK ] hastable.rehash (0 ms)
+[ RUN      ] hastable.collision
+[       OK ] hastable.collision (0 ms)
+[ RUN      ] hastable.collision_deletion
+[       OK ] hastable.collision_deletion (0 ms)
+[----------] 4 tests from hastable (1 ms total)
+
+[----------] 1 test from benchmark
+[ RUN      ] benchmark.init
+[       OK ] benchmark.init (0 ms)
+[----------] 1 test from benchmark (0 ms total)
+
+[----------] 1 test from benchmark_insert
+[ RUN      ] benchmark_insert.init
+[       OK ] benchmark_insert.init (0 ms)
+[----------] 1 test from benchmark_insert (0 ms total)
+
+[----------] 4 tests from benchmark_lookup_str
+[ RUN      ] benchmark_lookup_str.hashtable_siphash
+[ TIME     ] insert 1.3532 ms
+[ Collsion ] 0
+[ TIME     ] lookup 0.9865 ms
+[       OK ] benchmark_lookup_str.hashtable_siphash (3 ms)
+[ RUN      ] benchmark_lookup_str.hashtable_stdhash
+[ TIME     ] insert 1.9789 ms
+[ Collsion ] 0
+[ TIME     ] lookup 1.0984 ms
+[       OK ] benchmark_lookup_str.hashtable_stdhash (3 ms)
+[ RUN      ] benchmark_lookup_str.unordered_map_siphash
+[ TIME     ] insert 1.7577 ms
+[ TIME     ] lookup 1.0543 ms
+[       OK ] benchmark_lookup_str.unordered_map_siphash (3 ms)
+[ RUN      ] benchmark_lookup_str.unordered_map_stdhash
+[ TIME     ] insert 1.2896 ms
+[       OK ] benchmark_lookup_str.unordered_map_stdhash (2 ms)
+[----------] 4 tests from benchmark_lookup_str (14 ms total)
+
+[----------] 4 tests from benchmark_lookup_int
+[ RUN      ] benchmark_lookup_int.hashtable_siphash
+[ TIME     ] insert 1.5921 ms
+[ Collsion ] 0
+[ TIME     ] lookup 1.201 ms
+[       OK ] benchmark_lookup_int.hashtable_siphash (3 ms)
+[ RUN      ] benchmark_lookup_int.hashtable_stdhash
+[ TIME     ] insert 1.4795 ms
+[ Collsion ] 0
+[ TIME     ] lookup 1.109 ms
+[       OK ] benchmark_lookup_int.hashtable_stdhash (3 ms)
+[ RUN      ] benchmark_lookup_int.unordered_map_stdhash
+[ TIME     ] insert 1.8219 ms
+[ TIME     ] lookup 1.0668 ms
+[       OK ] benchmark_lookup_int.unordered_map_stdhash (3 ms)
+[ RUN      ] benchmark_lookup_int.unordered_map_siphash
+[ TIME     ] insert 1.5134 ms
+[ TIME     ] lookup 1.19 ms
+[       OK ] benchmark_lookup_int.unordered_map_siphash (3 ms)
+[----------] 4 tests from benchmark_lookup_int (14 ms total)
+
+[----------] Global test environment tear-down
+[==========] 19 tests from 8 test suites ran. (62 ms total)
+[  PASSED  ] 19 tests.
+PS E:\work\easyfs\build\bin\Release> ."E:/work/easyfs/build/bin/Release/easyfs_test.exe"
+[==========] Running 19 tests from 8 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from fast_mod
+[ RUN      ] fast_mod.valid
+[       OK ] fast_mod.valid (0 ms)
+[----------] 1 test from fast_mod (0 ms total)
+
+[----------] 1 test from fast_mod_p2
+[ RUN      ] fast_mod_p2.valid
+[       OK ] fast_mod_p2.valid (0 ms)
+[----------] 1 test from fast_mod_p2 (0 ms total)
+
+[----------] 3 tests from benchmark_mod
+[ RUN      ] benchmark_mod.fast_mod
+[       OK ] benchmark_mod.fast_mod (13 ms)
+[ RUN      ] benchmark_mod.reg_mod
+[       OK ] benchmark_mod.reg_mod (6 ms)
+[ RUN      ] benchmark_mod.fast_mod_p2
+[       OK ] benchmark_mod.fast_mod_p2 (6 ms)
+[----------] 3 tests from benchmark_mod (27 ms total)
+
+[----------] 4 tests from hastable
+[ RUN      ] hastable.base
+[       OK ] hastable.base (0 ms)
+[ RUN      ] hastable.rehash
+[       OK ] hastable.rehash (0 ms)
+[ RUN      ] hastable.collision
+[       OK ] hastable.collision (0 ms)
+[ RUN      ] hastable.collision_deletion
+[       OK ] hastable.collision_deletion (0 ms)
+[----------] 4 tests from hastable (1 ms total)
+
+[----------] 1 test from benchmark
+[ RUN      ] benchmark.init
+[       OK ] benchmark.init (0 ms)
+[----------] 1 test from benchmark (0 ms total)
+
+[----------] 1 test from benchmark_insert
+[ RUN      ] benchmark_insert.init
+[       OK ] benchmark_insert.init (0 ms)
+[----------] 1 test from benchmark_insert (0 ms total)
+
+[----------] 4 tests from benchmark_lookup_str
+[ RUN      ] benchmark_lookup_str.hashtable_siphash
+[ TIME     ] insert 1.4744 ms
+[ Collsion ] 0
+[ TIME     ] lookup 1.2326 ms
+[       OK ] benchmark_lookup_str.hashtable_siphash (3 ms)
+[ RUN      ] benchmark_lookup_str.hashtable_stdhash
+[ TIME     ] insert 1.2953 ms
+[ Collsion ] 0
+[ TIME     ] lookup 1.0463 ms
+[       OK ] benchmark_lookup_str.hashtable_stdhash (3 ms)
+[ RUN      ] benchmark_lookup_str.unordered_map_siphash
+[ TIME     ] insert 2.2628 ms
+[ TIME     ] lookup 1.1652 ms
+[       OK ] benchmark_lookup_str.unordered_map_siphash (4 ms)
+[ RUN      ] benchmark_lookup_str.unordered_map_stdhash
+[ TIME     ] insert 2.8477 ms
+[ TIME     ] lookup 1.2273 ms
+[       OK ] benchmark_lookup_str.unordered_map_stdhash (4 ms)
+[----------] 4 tests from benchmark_lookup_str (17 ms total)
+
+[----------] 4 tests from benchmark_lookup_int
+[ RUN      ] benchmark_lookup_int.hashtable_siphash
+[ TIME     ] insert 1.6574 ms
+[ Collsion ] 0
+[ TIME     ] lookup 1.1388 ms
+[       OK ] benchmark_lookup_int.hashtable_siphash (3 ms)
+[ RUN      ] benchmark_lookup_int.hashtable_stdhash
+[ TIME     ] insert 1.7113 ms
+[ Collsion ] 0
+[ TIME     ] lookup 1.3022 ms
+[       OK ] benchmark_lookup_int.hashtable_stdhash (3 ms)
+[ RUN      ] benchmark_lookup_int.unordered_map_stdhash
+[ TIME     ] insert 1.9315 ms
+[ TIME     ] lookup 1.0307 ms
+[       OK ] benchmark_lookup_int.unordered_map_stdhash (3 ms)
+[ RUN      ] benchmark_lookup_int.unordered_map_siphash
+[ TIME     ] insert 1.8887 ms
+[ TIME     ] lookup 0.9998 ms
+[       OK ] benchmark_lookup_int.unordered_map_siphash (3 ms)
+[----------] 4 tests from benchmark_lookup_int (15 ms total)
+
+[----------] Global test environment tear-down
+[==========] 19 tests from 8 test suites ran. (67 ms total)
+[  PASSED  ] 19 tests.
+
+
+# Mimalloc
+
+[==========] Running 19 tests from 8 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from fast_mod
+[ RUN      ] fast_mod.valid
+[       OK ] fast_mod.valid (0 ms)
+[----------] 1 test from fast_mod (0 ms total)
+
+[----------] 1 test from fast_mod_p2
+[ RUN      ] fast_mod_p2.valid
+[       OK ] fast_mod_p2.valid (0 ms)
+[----------] 1 test from fast_mod_p2 (0 ms total)
+
+[----------] 3 tests from benchmark_mod
+[ RUN      ] benchmark_mod.fast_mod
+[       OK ] benchmark_mod.fast_mod (12 ms)
+[ RUN      ] benchmark_mod.reg_mod
+[       OK ] benchmark_mod.reg_mod (6 ms)
+[ RUN      ] benchmark_mod.fast_mod_p2
+[       OK ] benchmark_mod.fast_mod_p2 (6 ms)
+[----------] 3 tests from benchmark_mod (25 ms total)
+
+[----------] 4 tests from hastable
+[ RUN      ] hastable.base
+[       OK ] hastable.base (0 ms)
+[ RUN      ] hastable.rehash
+[       OK ] hastable.rehash (0 ms)
+[ RUN      ] hastable.collision
+[       OK ] hastable.collision (0 ms)
+[ RUN      ] hastable.collision_deletion
+[       OK ] hastable.collision_deletion (0 ms)
+[----------] 4 tests from hastable (1 ms total)
+
+[----------] 1 test from benchmark
+[ RUN      ] benchmark.init
+[       OK ] benchmark.init (0 ms)
+[----------] 1 test from benchmark (0 ms total)
+
+[----------] 1 test from benchmark_insert
+[ RUN      ] benchmark_insert.init
+[       OK ] benchmark_insert.init (0 ms)
+[----------] 1 test from benchmark_insert (0 ms total)
+
+[----------] 4 tests from benchmark_lookup_str
+[ RUN      ] benchmark_lookup_str.hashtable_siphash
+[ TIME     ] insert 1.3335 ms
+[ Collsion ] 0
+[ TIME     ] lookup 0.987 ms
+[       OK ] benchmark_lookup_str.hashtable_siphash (2 ms)
+[ RUN      ] benchmark_lookup_str.hashtable_stdhash
+[ TIME     ] insert 1.2294 ms
+[ Collsion ] 0
+[ TIME     ] lookup 1.0814 ms
+[       OK ] benchmark_lookup_str.hashtable_stdhash (2 ms)
+[ RUN      ] benchmark_lookup_str.unordered_map_siphash
+[ TIME     ] insert 1.1295 ms
+[ TIME     ] lookup 1.095 ms
+[       OK ] benchmark_lookup_str.unordered_map_siphash (3 ms)
+[ RUN      ] benchmark_lookup_str.unordered_map_stdhash
+[ TIME     ] insert 1.0929 ms
+[ TIME     ] lookup 1.0107 ms
+[       OK ] benchmark_lookup_str.unordered_map_stdhash (2 ms)
+[----------] 4 tests from benchmark_lookup_str (12 ms total)
+
+[----------] 4 tests from benchmark_lookup_int
+[ RUN      ] benchmark_lookup_int.hashtable_siphash
+[ TIME     ] insert 1.4524 ms
+[ Collsion ] 0
+[ TIME     ] lookup 1.0759 ms
+[       OK ] benchmark_lookup_int.hashtable_siphash (3 ms)
+[ RUN      ] benchmark_lookup_int.hashtable_stdhash
+[ TIME     ] insert 1.4354 ms
+[ Collsion ] 0
+[ TIME     ] lookup 1.0664 ms
+[       OK ] benchmark_lookup_int.hashtable_stdhash (3 ms)
+[ RUN      ] benchmark_lookup_int.unordered_map_stdhash
+[ TIME     ] insert 1.5126 ms
+[ TIME     ] lookup 1.497 ms
+[       OK ] benchmark_lookup_int.unordered_map_stdhash (3 ms)
+[ RUN      ] benchmark_lookup_int.unordered_map_siphash
+[ TIME     ] insert 1.3417 ms
+[ TIME     ] lookup 1.2339 ms
+[       OK ] benchmark_lookup_int.unordered_map_siphash (3 ms)
+[----------] 4 tests from benchmark_lookup_int (15 ms total)
+
+[----------] Global test environment tear-down
+[==========] 19 tests from 8 test suites ran. (60 ms total)
+[  PASSED  ] 19 tests.

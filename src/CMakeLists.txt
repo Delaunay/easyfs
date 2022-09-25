@@ -3,10 +3,9 @@ INCLUDE_DIRECTORIES(.)
 
 # Source files
 # ====================================
-#           (Glob is not recommended)
-#   file(GLOB APL_SRC *.cc)
-#   file(GLOB_RECURSE APL_SRC *.cc)
-
+# (Glob is not recommended)
+# file(GLOB APL_SRC *.cc)
+# file(GLOB_RECURSE APL_SRC *.cc)
 SET(EASYFS_HDS
     logger.h
     siphash.h
@@ -17,12 +16,13 @@ SET(EASYFS_SRC
     siphash.cpp
 )
 
+INCLUDE_DIRECTORIES(mimalloc)
+
 # main library (prevent recompilation when building tests)
 ADD_LIBRARY(easyfs ${EASYFS_SRC} ${EASYFS_HDS})
-TARGET_LINK_LIBRARIES(easyfs spdlog::spdlog)
+TARGET_LINK_LIBRARIES(easyfs spdlog::spdlog mimalloc-static)
 
-#  main executable
+# main executable
 # ==========================
-
 ADD_EXECUTABLE(main main.cpp)
 TARGET_LINK_LIBRARIES(main spdlog::spdlog easyfs)

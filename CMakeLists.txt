@@ -46,15 +46,22 @@ endif()
 # Compiler-flag
 IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
     MESSAGE(STATUS "Building Debug Version")
-    ADD_DEFINITIONS(-O0)
-    ADD_LINK_OPTIONS(-rdynamic) # For stack trace with symbols
+
+    if(UNIX)
+        ADD_DEFINITIONS(-O0)
+        ADD_LINK_OPTIONS(-rdynamic) # For stack trace with symbols
+    endif()
 ELSE()
     MESSAGE(STATUS "Building Release Version")
-    ADD_DEFINITIONS(-O2)
+
+    if(UNIX)
+        ADD_DEFINITIONS(-O2)
+    endif()
 ENDIF()
 
 # Subdirectories
 # ====================================
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
 # Dependencies to be compiled
 ADD_SUBDIRECTORY(dependencies)

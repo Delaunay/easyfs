@@ -30,7 +30,7 @@ TEST(fast_mod_p2, valid) {
 TEST(benchmark_mod, fast_mod) {
     int n = 1024;
     for(int j = 0; j < REPEAT; j++) {
-        int volatile s = 0;
+        uint64_t volatile s = 0;
         for(int i = 0; i < n * 2; i++) {
             s += fast_mod(i, n);
         }
@@ -40,7 +40,7 @@ TEST(benchmark_mod, fast_mod) {
 TEST(benchmark_mod, reg_mod) {
     int n = 1024;
     for(int j = 0; j < REPEAT; j++) {
-        int volatile s = 0;
+        uint64_t volatile s = 0;
         for(int i = 0; i < n * 2; i++) {
             s += reg_mod(i, n);
         }
@@ -50,7 +50,7 @@ TEST(benchmark_mod, reg_mod) {
 TEST(benchmark_mod, fast_mod_p2) {
     int n = 1024;
     for(int j = 0; j < REPEAT; j++) {
-        int volatile s = 0;
+        uint64_t volatile s = 0;
         for(int i = 0; i < n * 2; i++) {
             s += fast_mod_p2(i, n);
         }
@@ -193,7 +193,7 @@ inline std::vector<std::tuple<std::string, int>> const &pairs() {
     while(f) {
         std::string s;
         f >> s;
-        data.push_back(std::make_tuple(s, data.size()));
+        data.push_back(std::make_tuple(s, int(data.size())));
 
         if(data.size() > SIZE) {
             break;

@@ -1,5 +1,7 @@
 {
     "files.associations": {
+        "*.rst": "reStructuredText",
+        "*.usf": "cpp",
         "typeinfo": "cpp",
         "array": "cpp",
         "initializer_list": "cpp",
@@ -62,6 +64,9 @@
         "shared_mutex": "cpp",
         "thread": "cpp",
         "cinttypes": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "xmemory": "cpp",
+        "xstddef": "cpp",
+        "xstring": "cpp"
     }
 }
