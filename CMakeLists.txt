@@ -17,22 +17,19 @@ LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 # C++ Standard
 # ====================================
-
 SET(CMAKE_CXX_STANDARD 20)
 SET(CXX_STANDARD_REQUIRED ON)
 
 # Project's Options
 # ====================================
-
-OPTION(BUILD_TESTING        "Enable tests"       OFF)
-OPTION(BUILD_BENCHMARK      "Build Benchmarks"   OFF)
-OPTION(BUILD_EXAMPLES       "Build Examples"     OFF)
-OPTION(BUILD_DOCUMENTATION  "Build docs"         OFF)
+OPTION(BUILD_TESTING "Enable tests" ON)
+OPTION(BUILD_BENCHMARK "Build Benchmarks" OFF)
+OPTION(BUILD_EXAMPLES "Build Examples" OFF)
+OPTION(BUILD_DOCUMENTATION "Build docs" OFF)
 
 # Binary/pre-compiled Dependencies
 # ====================================
 FIND_PACKAGE(Git REQUIRED)
-
 
 # Configuration
 # ====================================
@@ -40,15 +37,17 @@ FIND_PACKAGE(Git REQUIRED)
 # Find revision ID and hash of the sourcetree
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 INCLUDE(genrev)
-INCLUDE(CodeCoverage)
 
-append_coverage_compiler_flags()
+if(UNIX)
+    INCLUDE(CodeCoverage)
+    append_coverage_compiler_flags()
+endif()
 
 # Compiler-flag
 IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
     MESSAGE(STATUS "Building Debug Version")
     ADD_DEFINITIONS(-O0)
-    ADD_LINK_OPTIONS(-rdynamic)         # For stack trace with symbols
+    ADD_LINK_OPTIONS(-rdynamic) # For stack trace with symbols
 ELSE()
     MESSAGE(STATUS "Building Release Version")
     ADD_DEFINITIONS(-O2)
@@ -70,28 +69,26 @@ IF(BUILD_TESTING)
     ADD_SUBDIRECTORY(tests)
 ENDIF(BUILD_TESTING)
 
-IF (BUILD_EXAMPLES)
+IF(BUILD_EXAMPLES)
     MESSAGE(STATUS "Building examples")
     ADD_SUBDIRECTORY(examples)
-ENDIF (BUILD_EXAMPLES)
+ENDIF(BUILD_EXAMPLES)
 
-IF (BUILD_BENCHMARK)
+IF(BUILD_BENCHMARK)
     MESSAGE(STATUS "Building Benchmarks")
     ADD_SUBDIRECTORY(benchmark)
 ENDIF(BUILD_BENCHMARK)
 
 # Gen doc ?
-IF (BUILD_DOCUMENTATION)
+IF(BUILD_DOCUMENTATION)
     MESSAGE(STATUS "Documentation building is enabled")
     ADD_SUBDIRECTORY(docs)
-ENDIF (BUILD_DOCUMENTATION)
-
+ENDIF(BUILD_DOCUMENTATION)
 
 # Helper commands
 # ====================================
 # so you do not have to leave the command line
 # or remember the exact arguments
-
 ADD_CUSTOM_TARGET(enable-examples
     cmake -DBUILD_EXAMPLES=ON ${CMAKE_SOURCE_DIR})
 
@@ -118,13 +115,11 @@ ADD_CUSTOM_TARGET(compile-db DEBUG
 
 ADD_CUSTOM_TARGET(clang-tidy DEBUG
     clang-tidy -p= ${CMAKE_BINARY_DIR} -header-filter=.*
-        ${CMAKE_SOURCE_DIR}/src/*.cpp ${CMAKE_SOURCE_DIR}/src/*.h)
-
+    ${CMAKE_SOURCE_DIR}/src/*.cpp ${CMAKE_SOURCE_DIR}/src/*.h)
 
 # Resource Files
 # ====================================
 # Some IDEs need the files to be inside a cmake target to be displayed
-
 ADD_CUSTOM_TARGET(zothers ALL SOURCES
     README.md
     .travis.yml

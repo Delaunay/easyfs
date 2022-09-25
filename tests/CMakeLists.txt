@@ -6,9 +6,11 @@ INCLUDE(CTest)
 SET(TEST_HEADER
     hashtable_test.h)
 
-setup_target_for_coverage_gcovr_html(
-    NAME coverage
-    EXECUTABLE ctest -j 4)
+if(UNIX)
+    setup_target_for_coverage_gcovr_html(
+        NAME coverage
+        EXECUTABLE ctest -j 4)
+endif()
 
 # Add your test to CMAKE
 # to run all tests run 'make test'
@@ -18,7 +20,11 @@ MACRO(TEST_MACRO NAME LIBRARIES) # LIBRARIES
 
     # gtest need to be compiled first
     ADD_DEPENDENCIES(${NAME}_test gtest)
-    ADD_DEPENDENCIES(coverage ${NAME}_test)
+
+    if(UNIX)
+        ADD_DEPENDENCIES(coverage ${NAME}_test)
+    endif()
+
     ADD_TEST(
         NAME ${NAME}_test
         WORKING_DIRECTORY .
